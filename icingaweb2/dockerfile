@@ -1,0 +1,18 @@
+From centos:latest
+
+RUN yum upgrade -y  && \
+  yum install -y https://packages.icinga.com/epel/icinga-rpm-release-7-latest.noarch.rpm && \
+  yum install -y epel-release centos-release-scl && \
+  yum install -y icingaweb2 icingacli httpd rh-php71-php-mysqlnd && \
+  icingacli module disable setup && \
+  icingacli module enable monitoring && \
+  chown -R apache:icingaweb2 /etc/icingaweb2 && \
+  chmod -R 777 /opt/rh/rh-php71/root
+
+COPY startup.sh /
+
+RUN sed -i 's/#ServerName www.example.com:80/ServerName icinga2web-test.com:80/g' /etc/httpd/conf/httpd.conf
+
+EXPOSE 80
+
+ENTRYPOINT ["/usr/bin/bash", "/startup.sh"]
